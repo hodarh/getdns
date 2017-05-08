@@ -180,8 +180,8 @@ getdns_return_t getdns_pubkey_pinset_sanity_check(
 	if (getdns_list_get_length(pinset, &pins))
 		PKP_SC_HARDERR("Can't get length of pinset",
 			       GETDNS_RETURN_INVALID_PARAMETER);
-	if (pins < 2)
-		PKP_SC_ERR("This pinset has fewer than 2 pins");
+	if (pins < 1)
+		PKP_SC_ERR("This pinset has fewer than 1 pins");
 	for (i = 0; i < pins; i++)
 	{
 		/* is it a dict? */
@@ -200,8 +200,8 @@ getdns_return_t getdns_pubkey_pinset_sanity_check(
 			if (getdns_dict_get_bindata(pin, "value", &data)) {
 				PKP_SC_ERR("Pin has no 'value' entry");
 			} else {
-				if (data->size != SHA256_DIGEST_LENGTH)
-					PKP_SC_ERR("Pin has the wrong size 'value' (should be 32 octets for sha256)");
+				if (data->size != SHA256_DIGEST_LENGTH){
+					PKP_SC_ERR("Pin has the wrong size 'value' (should be 32 octets for sha256)");}
 			}
 			
 		/* should we choke if it has some other key? for
@@ -210,8 +210,9 @@ getdns_return_t getdns_pubkey_pinset_sanity_check(
 		}
 	}
 	
-	if (errorcount > 0)
-		return GETDNS_RETURN_GENERIC_ERROR;
+	if (errorcount > 0){
+		DEBUG_STUB("Hoda %s\n",getdns_pretty_print_list(errorlist));
+		return GETDNS_RETURN_GENERIC_ERROR;}
 	return GETDNS_RETURN_GOOD;
 }
 

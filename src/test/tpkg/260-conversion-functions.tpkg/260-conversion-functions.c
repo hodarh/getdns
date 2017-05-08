@@ -254,6 +254,7 @@ int main(int argc, char const * const argv[])
 	fclose(in);
 
 	print_list(rr_list);
+	getdns_print_json_list(rr_list, 1);
 
 
 	/* Fill the wire_buf with wireformat RR's in rr_list

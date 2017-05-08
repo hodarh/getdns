@@ -440,6 +440,134 @@
     }
     END_TEST
 
+    START_TEST (getdns_context_set_upstream_recursive_servers_12)
+    {
+     /*
+      */
+
+      struct getdns_context *context = NULL;
+      struct getdns_context *context_pin = NULL;
+      struct getdns_context *context_pin_set = NULL;
+      struct getdns_list    *upstream_list = NULL;
+      struct getdns_list    *errorlist = NULL;
+      struct getdns_list  *pubkey_pinset = NULL;
+      struct getdns_dict *dict = NULL;
+      struct getdns_dict *pubkey_pin = NULL;
+      struct getdns_dict *response = NULL;
+      struct getdns_bindata address_type = { 4, (void *)"IPv4" };
+      struct getdns_bindata address_data = { 4, (void *)"\x91\x64\xb9\x0f" };
+      struct getdns_bindata port = { 3, (void *)"53" };
+      struct getdns_bindata digest = {sizeof("sha256") - 1, (void*) "sha256"};
+      struct getdns_bindata value = {32, (void*)"\xeb\x69\x4a\xbb\xd1\xec\x0d\x56\xf2\x88\xf7\xa7\x02\x99\xdc\xc7\xe6\x49\x84\xc7\x39\x57\xc5\x80\xbd\xe9\xc8\x1f\x9c\x04\xbe"};
+      struct getdns_bindata tls_auth_name = {sizeof("dnsovertls.sinodun.com") - 1, (void*) "dnsovertls.sinodun.com"};
+      char *tls_name = "dnsovertls.sinodun.com";
+//      sha256_pin_t *tls_pubkey_pinset;
+  //    tls_pubkey_pinset ->pin = "62lKu9HsDVbyiPenApnc4sfmSYTHOVfFgL3pyB+cBL4=";
+    //  tls_pubkey_pinset ->next = NULL;
+      size_t index = 0;
+
+      CONTEXT_CREATE(TRUE);
+      LIST_CREATE(upstream_list);
+      LIST_CREATE(errorlist);
+      DICT_CREATE(dict);
+      DICT_CREATE(pubkey_pin);
+
+
+      ASSERT_RC(getdns_dict_set_bindata(dict, "address_type", &address_type),
+         GETDNS_RETURN_GOOD, "Return code from getdns_dict_set_bindata()");
+
+      ASSERT_RC(getdns_dict_set_bindata(dict, "address_data", &address_data),
+         GETDNS_RETURN_GOOD, "Return code from getdns_dict_set_bindata()");
+
+      ASSERT_RC(getdns_dict_set_bindata(dict, "53", &port),
+         GETDNS_RETURN_GOOD, "Return code from getdns_dict_set_bindata()");
+
+      ASSERT_RC(getdns_dict_set_bindata(pubkey_pin, "digest", &digest),
+         GETDNS_RETURN_GOOD, "Return code from getdns_dict_set_bindata()");
+
+ ASSERT_RC(getdns_dict_set_bindata(pubkey_pin, "value", &value),
+         GETDNS_RETURN_GOOD, "Return code from getdns_dict_set_bindata()");
+ASSERT_RC(getdns_dict_set_bindata(dict, "tls_auth_name", &tls_auth_name),
+	GETDNS_RETURN_GOOD, "Return code from getdns_dict_set_bindata()");
+
+     /* ASSERT_RC(getdns_dict_util_set_string(dict, "tls_auth_name", tls_name),
+         GETDNS_RETURN_GOOD, "Return code from getdns_dict_util_set_string"); 
+      
+      ASSERT_RC(getdns_dict_util_set_string(dict, "tsig_name", "62lKu9HsDVbyiPenApnc4sfmSYTHOVfFgL3pyB+cBL4="),
+         GETDNS_RETURN_GOOD, "Return code from getdns_dict_util_set_string");
+      ASSERT_RC(getdns_dict_util_set_string(dict, "tsig_algorithm", "sha256"),
+         GETDNS_RETURN_GOOD, "Return code from getdns_dict_util_set_string");*/
+     pubkey_pinset = getdns_list_create_with_context(context_pin_set);
+      int pincount = 0;
+      getdns_list_set_dict(pubkey_pinset, pincount++, pubkey_pin);
+      getdns_dict_set_list(dict, "tls_pubkey_pinset", pubkey_pinset);
+
+ ASSERT_RC(getdns_pubkey_pinset_sanity_check(pubkey_pinset, errorlist),
+         GETDNS_RETURN_GOOD, "Return code from getdns_pubkey_pinset_sanity_check()");
+
+
+      ASSERT_RC(getdns_list_set_dict(upstream_list, index, dict), GETDNS_RETURN_GOOD,
+        "Return code from getdns_list_set_dict()");
+
+
+//printf("Hodaa %s\n", getdns_pretty_print_list(errorlist));
+
+      getdns_transport_list_t transport_list[1];
+      transport_list[0] = GETDNS_TRANSPORT_TLS;
+     ASSERT_RC(getdns_context_set_resolution_type(context, GETDNS_RESOLUTION_STUB),
+         GETDNS_RETURN_GOOD, "Return code from getdns_context_set_resolution_type()");
+ 
+      ASSERT_RC(getdns_context_set_dns_transport_list(context, 1, transport_list),
+	GETDNS_RETURN_GOOD, "Return code from getdns_context_set_dns_transport_list()");
+      getdns_transport_list_t *transport_list2;
+      size_t count;
+      ASSERT_RC(getdns_context_get_dns_transport_list(context, &count, &transport_list2),
+        GETDNS_RETURN_GOOD, "Return code from getdns_context_get_dns_transport_list()");
+      ck_assert_msg(transport_list2[0] == GETDNS_TRANSPORT_TLS, "transport_list should be 1202 but got %d", (int) transport_list2[0]);
+      ASSERT_RC(getdns_context_set_tls_authentication(context, GETDNS_AUTHENTICATION_REQUIRED),
+	GETDNS_RETURN_GOOD, "Return cond from getdns_context_set_tls_authentication()");
+      getdns_tls_authentication_t auth;
+      ASSERT_RC(getdns_context_get_tls_authentication(context, &auth),
+	GETDNS_RETURN_GOOD, "Return code from getdns_context_get_tls_authentication()");
+      ck_assert_msg(auth == 1301, "tls_authentication should be 1301, but got %d", (int) auth);
+      ASSERT_RC(getdns_context_set_tls_backoff_time(context, 1000), 
+	GETDNS_RETURN_GOOD, "Return code from getdns_context_set_tls_backoff_time()");
+      uint16_t backoff;
+      ASSERT_RC(getdns_context_get_tls_backoff_time(context, &backoff),
+        GETDNS_RETURN_GOOD, "Return code from getdns_context_get_tls_backoff_time()");
+      ck_assert_msg(backoff == 1000, "backoff should be 1000, but got %d", (int) backoff);
+
+      ASSERT_RC(getdns_context_set_tls_connection_retries(context, 5),
+	GETDNS_RETURN_GOOD, "Return code from getdns_context_set_tls_connection_retries()");
+      uint16_t retries;
+      ASSERT_RC(getdns_context_get_tls_connection_retries(context, &retries),
+	GETDNS_RETURN_GOOD, "Return code from getdns_context_get_tls_connection_retries()");
+      ck_assert_msg(retries == 5, "retries should be 5 but got %d", (int) retries);
+
+//      ck_assert_msg(0, "Nedaaaa %s\n", getdns_pretty_print_list(upstream_list));
+//printf("Hoda upstream_list is %s\n", getdns_pretty_print_list(upstream_list));
+//fflush(stdout);
+      ASSERT_RC(getdns_context_set_upstream_recursive_servers(context, upstream_list),
+        GETDNS_RETURN_GOOD, "Return code from getdns_context_set_upstream_recursive_servers()");
+
+ /*     ASSERT_RC(getdns_general_sync(context, "google.com", GETDNS_RRTYPE_A, NULL, &response),
+         GETDNS_RETURN_GOOD, "Return code from getdns_general_sync()");
+
+
+      EXTRACT_RESPONSE;
+      printf("the resp is %s\n", getdns_pretty_print_dict(response));
+
+
+       assert_noerror(&ex_response);
+       assert_address_in_answer(&ex_response, TRUE, FALSE);
+*/
+      CONTEXT_DESTROY;
+      LIST_DESTROY(upstream_list);
+      DICT_DESTROY(dict);
+      DICT_DESTROY(response);
+    }
+    END_TEST
+
     
     
     
@@ -449,7 +577,7 @@
       Suite *s = suite_create ("getdns_context_set_upstream_recursive_servers()");
     
       /* Negative test caseis */
-      TCase *tc_neg = tcase_create("Negative");
+  /*    TCase *tc_neg = tcase_create("Negative");
       tcase_add_test(tc_neg, getdns_context_set_upstream_recursive_servers_1);
       tcase_add_test(tc_neg, getdns_context_set_upstream_recursive_servers_2);
       tcase_add_test(tc_neg, getdns_context_set_upstream_recursive_servers_3);
@@ -460,12 +588,13 @@
       tcase_add_test(tc_neg, getdns_context_set_upstream_recursive_servers_8);
 
       suite_add_tcase(s, tc_neg);
-    
+    */
       /* Positive test cases */
        TCase *tc_pos = tcase_create("Positive");
-       tcase_add_test(tc_pos, getdns_context_set_upstream_recursive_servers_9);
+      // tcase_add_test(tc_pos, getdns_context_set_upstream_recursive_servers_9);
 /***** tcase_add_test(tc_pos, getdns_context_set_upstream_recursive_servers_10); *****/
-       tcase_add_test(tc_pos, getdns_context_set_upstream_recursive_servers_11);
+      // tcase_add_test(tc_pos, getdns_context_set_upstream_recursive_servers_11);
+       tcase_add_test(tc_pos, getdns_context_set_upstream_recursive_servers_12);
       
        suite_add_tcase(s, tc_pos);
 

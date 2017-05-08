@@ -147,6 +147,11 @@
        /* Request a response that should be truncated over UDP */
        ASSERT_RC(getdns_context_set_dns_transport(context, GETDNS_TRANSPORT_UDP_ONLY),
          GETDNS_RETURN_GOOD, "Return code from getdns_context_set_dns_transport()");
+       getdns_transport_t trans;
+       ASSERT_RC(getdns_context_get_dns_transport(context, &trans),
+         GETDNS_RETURN_GOOD, "Return code from getdns_context_get_dns_transport()");
+	ck_assert_msg(trans == GETDNS_TRANSPORT_UDP_ONLY, "dns_transport should be GETDNS_TRANSPORT_UDP_ONLY but got %s", (char*)trans);
+
        ASSERT_RC(getdns_context_set_edns_maximum_udp_payload_size(context, 512),
            GETDNS_RETURN_GOOD, "Return code from getdns_context_set_edns_maximum_udp_payload_size()"); 
        ASSERT_RC(getdns_context_set_edns_do_bit(context, 1),

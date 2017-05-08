@@ -77,6 +77,50 @@
     }
     END_TEST
 
+    START_TEST (getdns_context_set_context_update_callback_3)
+    {
+     /*
+      *  Context is NULL
+      *  Call getdns_context_set_edns_maximum_udp_payload_size() setting max UDP payload to 512
+      *  expect:  GETDNS_RETURN_INVALID_PARAMETER
+      */
+
+       struct getdns_context *context = NULL;
+
+       expected_changed_item = GETDNS_CONTEXT_CODE_EDNS_MAXIMUM_UDP_PAYLOAD_SIZE;
+
+       ASSERT_RC(getdns_context_set_edns_maximum_udp_payload_size(context, 512),
+         GETDNS_RETURN_INVALID_PARAMETER, "Return code from getdns_context_set_edns_maximum_udp_payload_size()");
+
+       ASSERT_RC(getdns_context_unset_edns_maximum_udp_payload_size(context),
+         GETDNS_RETURN_INVALID_PARAMETER, "Return code from getdns_context_unset_edns_maximum_udp_payload_size()");
+    }
+    END_TEST
+
+    START_TEST (getdns_context_set_context_update_callback_4)
+    {
+     /*
+      *  Create a context by calling getdns_context_create()
+      *  Define a callback routine for context changes and call getdns_context_set_context_update_callback() so that it gets called when there are context changes
+      *  Call getdns_context_set_edns_do_bit() setting  edns do bit to an invalid value
+      *  expect:  GETDNS_RETURN_CONTEXT_UPDATE_FAIL
+      */
+      struct getdns_context *context = NULL;
+      CONTEXT_CREATE(TRUE);
+
+      ASSERT_RC(getdns_context_set_context_update_callback(context, update_callbackfn),
+        GETDNS_RETURN_GOOD, "Return code from getdns_context_set_context_update_callback()");
+
+      expected_changed_item = GETDNS_CONTEXT_CODE_EDNS_DO_BIT;
+
+      ASSERT_RC(getdns_context_set_edns_do_bit(context, 5),
+        GETDNS_RETURN_CONTEXT_UPDATE_FAIL, "Return code from getdns_context_set_edns_do_bit()");
+
+      CONTEXT_DESTROY;
+    }
+    END_TEST
+
+
     START_TEST (getdns_context_set_context_update_callback_5)
     {
       /*
@@ -277,6 +321,7 @@
       *  expect:  GETDNS_CONTEXT_CODE_EDNS_MAXIMUM_UDP_PAYLOAD_SIZE
       */ 
       struct getdns_context *context = NULL;
+      uint16_t payload_size;
       CONTEXT_CREATE(TRUE);
 
       ASSERT_RC(getdns_context_set_context_update_callback(context, update_callbackfn),
@@ -286,6 +331,14 @@
 
       ASSERT_RC(getdns_context_set_edns_maximum_udp_payload_size(context, 512),
         GETDNS_RETURN_GOOD, "Return code from getdns_context_set_edns_maximum_udp_payload_size()");
+
+      ASSERT_RC(getdns_context_get_edns_maximum_udp_payload_size(context, &payload_size),
+        GETDNS_RETURN_GOOD, "Return code from getdns_context_get_edns_maximum_udp_payload_size()");
+
+      ck_assert_msg(payload_size == 512, "payload_size should == 512, got %d", (int)payload_size);
+
+      ASSERT_RC(getdns_context_unset_edns_maximum_udp_payload_size(context),
+        GETDNS_RETURN_GOOD, "Return code from getdns_context_unset_edns_maximum_udp_payload_size()");
 
       CONTEXT_DESTROY;
        
@@ -301,6 +354,7 @@
       *  expect:  GETDNS_CONTEXT_CODE_EDNS_EXTENDED_RCODE
       */ 
       struct getdns_context *context = NULL;
+      uint8_t extended_rcode;
       CONTEXT_CREATE(TRUE);
 
       ASSERT_RC(getdns_context_set_context_update_callback(context, update_callbackfn),
@@ -311,6 +365,13 @@
       ASSERT_RC(getdns_context_set_edns_extended_rcode(context, 1),
         GETDNS_RETURN_GOOD, "Return code from getdns_context_set_edns_extended_rcode()");
 
+      ASSERT_RC(getdns_context_set_edns_extended_rcode(context, 1),
+        GETDNS_RETURN_GOOD, "Return code from getdns_context_set_edns_extended_rcode()");
+
+      ASSERT_RC(getdns_context_get_edns_extended_rcode(context, &extended_rcode),
+        GETDNS_RETURN_GOOD, "Return code from getdns_context_get_edns_extended_rcode()");
+
+      ck_assert_msg(extended_rcode == 1, "extended_rcode should be 1, got %d", (int)extended_rcode);
       CONTEXT_DESTROY;
        
     }
@@ -325,6 +386,7 @@
       *  expect:  GETDNS_CONTEXT_CODE_EDNS_VERSION
       */ 
       struct getdns_context *context = NULL;
+      uint8_t version;
       CONTEXT_CREATE(TRUE);
 
       ASSERT_RC(getdns_context_set_context_update_callback(context, update_callbackfn),
@@ -334,6 +396,11 @@
 
       ASSERT_RC(getdns_context_set_edns_version(context, 1),
         GETDNS_RETURN_GOOD, "Return code from getdns_context_set_edns_version()");
+
+      ASSERT_RC(getdns_context_get_edns_version(context, &version),
+        GETDNS_RETURN_GOOD, "Return code from getdns_context_get_edns_version()");
+
+      ck_assert_msg(version == 1, "version should be 1, got %d", (int)version);
 
       CONTEXT_DESTROY;
        
@@ -349,6 +416,7 @@
       *  expect:  GETDNS_CONTEXT_CODE_EDNS_DO_BIT
       */ 
       struct getdns_context *context = NULL;
+      uint8_t do_bit;
       CONTEXT_CREATE(TRUE);
 
       ASSERT_RC(getdns_context_set_context_update_callback(context, update_callbackfn),
@@ -358,6 +426,11 @@
 
       ASSERT_RC(getdns_context_set_edns_do_bit(context, 1),
         GETDNS_RETURN_GOOD, "Return code from getdns_context_set_edns_do_bit()");
+
+      ASSERT_RC(getdns_context_get_edns_do_bit(context, &do_bit),
+	GETDNS_RETURN_GOOD, "Return code from getdns_context_get_edns_do_bit()");
+
+      ck_assert_msg(do_bit == 1, "do_bit should be 1, got %d", (int)do_bit);
 
       CONTEXT_DESTROY;
        
@@ -373,6 +446,7 @@
       *  expect:  GETDNS_CONTEXT_CODE_EDNS_CLIENT_SUBNET_PRIVATE
       */ 
       struct getdns_context *context = NULL;
+      uint8_t client_subnet_private;
       CONTEXT_CREATE(TRUE);
 
       ASSERT_RC(getdns_context_set_context_update_callback(context, update_callbackfn),
@@ -383,6 +457,10 @@
       ASSERT_RC(getdns_context_set_edns_client_subnet_private(context, 1),
         GETDNS_RETURN_GOOD, "Return code from getdns_context_set_edns_client_subnet_private()");
 
+      ASSERT_RC(getdns_context_get_edns_client_subnet_private(context, &client_subnet_private),
+        GETDNS_RETURN_GOOD, "Return code from getdns_context_get_edns_client_subnet_private()");
+
+      ck_assert_msg(client_subnet_private == 1, "client_subnet_private should be 1, got %d", (int)client_subnet_private);
       CONTEXT_DESTROY;
        
     }
@@ -406,6 +484,11 @@
 
       ASSERT_RC(getdns_context_set_tls_query_padding_blocksize(context, 1400),
         GETDNS_RETURN_GOOD, "Return code from getdns_context_set_tls_query_padding_blocksize()");
+      uint16_t pad;
+      ASSERT_RC(getdns_context_get_tls_query_padding_blocksize(context, &pad),
+        GETDNS_RETURN_GOOD, "Return code from getdns_context_get_tls_query_padding_blocksize()");
+      ck_assert_msg(pad == 1400, "padding_blocksize should be 1400 but got %d", (int) pad);
+
 
       CONTEXT_DESTROY;
        
@@ -438,11 +521,11 @@
     START_TEST (getdns_context_set_context_update_callback_23)
     {
      /*
-      *  value is NULL
-      *  expect: GETDNS_RETURN_INVALID_PARAMETER
+      *  expect: GETDNS_RETURN_GOOD
       */
 
       struct getdns_context *context = NULL;
+      uint8_t round_robin;
       CONTEXT_CREATE(TRUE);
 
       ASSERT_RC(getdns_context_set_context_update_callback(context, update_callbackfn),
@@ -451,7 +534,12 @@
       expected_changed_item = GETDNS_CONTEXT_CODE_ROUND_ROBIN_UPSTREAMS;
 
       ASSERT_RC(getdns_context_set_round_robin_upstreams(context, 1),
-        GETDNS_RETURN_GOOD, "Return code from getdns_context_set_timeout()");
+        GETDNS_RETURN_GOOD, "Return code from getdns_context_set_round_robin_upstream()");
+
+      ASSERT_RC(getdns_context_get_round_robin_upstreams(context, &round_robin),
+        GETDNS_RETURN_GOOD, "Return code from getdns_context_get_round_robin_upstream()");
+
+      ck_assert_msg( round_robin == 1, "round_robin should be 1, got %d", (int)round_robin);
 
       CONTEXT_DESTROY;
 
@@ -467,6 +555,8 @@
       TCase *tc_neg = tcase_create("Negative");
       tcase_add_test(tc_neg, getdns_context_set_context_update_callback_1);
       tcase_add_test(tc_neg, getdns_context_set_context_update_callback_2);
+      tcase_add_test(tc_neg, getdns_context_set_context_update_callback_3);
+      tcase_add_test(tc_neg, getdns_context_set_context_update_callback_4);
       suite_add_tcase(s, tc_neg);
     
       /* Positive test cases */
@@ -477,7 +567,7 @@
       tcase_add_test(tc_pos, getdns_context_set_context_update_callback_8);
       tcase_add_test(tc_pos, getdns_context_set_context_update_callback_9);
       tcase_add_test(tc_pos, getdns_context_set_context_update_callback_10);
-      tcase_add_test(tc_pos, getdns_context_set_context_update_callback_15);
+//      tcase_add_test(tc_pos, getdns_context_set_context_update_callback_15);
       tcase_add_test(tc_pos, getdns_context_set_context_update_callback_16);
       tcase_add_test(tc_pos, getdns_context_set_context_update_callback_17);
       tcase_add_test(tc_pos, getdns_context_set_context_update_callback_18);

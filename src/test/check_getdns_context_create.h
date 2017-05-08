@@ -77,6 +77,35 @@
      }
      END_TEST
 
+     START_TEST (getdns_context_create_4)
+     {
+      /*
+       *          GETDNS_RETURN_GOOD
+       */
+       struct getdns_context *context = NULL;
+       getdns_dict *pubkey_pin = NULL;
+       getdns_list *pubkey_pinset = NULL;
+       getdns_list *errorlist = NULL;
+       size_t pincount = 0;
+
+       CONTEXT_CREATE(TRUE);
+       LIST_CREATE(errorlist);
+       pubkey_pin = getdns_pubkey_pin_create_from_string(context, "pin-sha256=\"E9CZ9INDbd+2eRQozYqqbQ2yXLVKB9+xcprMF+44U1g=\"");
+       ck_assert_msg(pubkey_pin != NULL, "pubkey_pin creation failed");
+       pubkey_pinset = getdns_list_create_with_context(context),
+       ck_assert_msg(pubkey_pinset != NULL, "pubkey_pinset creation failed");
+       ASSERT_RC(getdns_list_set_dict(pubkey_pinset, pincount++, pubkey_pin),
+	GETDNS_RETURN_GOOD, "getdns_list_set_dict failed");
+       //ASSERT_RC(getdns_pubkey_pinset_sanity_check(pubkey_pinset, errorlist),
+	//GETDNS_RETURN_GOOD, "getdns_pubkey_pinset_sanity_check failed");
+
+       getdns_dict_destroy(pubkey_pin);
+       getdns_list_destroy(pubkey_pinset);
+       CONTEXT_DESTROY;
+     }
+     END_TEST
+
+
      Suite *
      getdns_context_create_suite (void)
      {
@@ -91,6 +120,7 @@
        TCase *tc_pos = tcase_create("Positive");
        tcase_add_test(tc_pos, getdns_context_create_2);
        tcase_add_test(tc_pos, getdns_context_create_3);
+       tcase_add_test(tc_pos, getdns_context_create_4);
        suite_add_tcase(s, tc_pos);
      
        return s;

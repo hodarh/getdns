@@ -76,6 +76,29 @@ START_TEST (getdns_context_set_timeout_2)
 }
 END_TEST
 
+START_TEST (getdns_context_set_timeout_3)
+{
+ /*
+  *  timeout is 1000
+  *  expect: GETDNS_RETURN_GOOD
+  */
+
+  struct getdns_context *context = NULL;
+  uint64_t timeout;
+  CONTEXT_CREATE(TRUE);
+
+  ASSERT_RC(getdns_context_set_timeout(context, 1000),
+    GETDNS_RETURN_GOOD, "Return code from getdns_context_set_timeout()");
+  ASSERT_RC(getdns_context_get_timeout(context, &timeout),
+    GETDNS_RETURN_GOOD, "Return code from getdns_context_get_edns_maximum_udp_payload_size()");
+  ck_assert_msg(timeout == 1000, "timeout should be 1000, got %d", (int)timeout);
+
+  CONTEXT_DESTROY;
+
+}
+END_TEST
+
+
 START_TEST (getdns_context_set_idle_timeout_1)
 {
  /*
@@ -258,7 +281,7 @@ void timeout_3_cb(struct getdns_context *context,
 }
 
 /* Temporarily disabled because of unpredictable results */
-START_TEST (getdns_context_set_timeout_3)
+START_TEST (getdns_context_set_timeout_4)
 {
   /*
   *  Create a context by calling getdns_context_create()
@@ -354,6 +377,7 @@ getdns_context_set_timeout_suite (void)
   TCase *tc_pos = tcase_create("Positive");
   tcase_set_timeout(tc_pos, 15.0);
   tcase_add_test(tc_pos, getdns_context_set_timeout_3);
+//  tcase_add_test(tc_pos, getdns_context_set_timeout_4);
   suite_add_tcase(s, tc_pos);
 
    return s;
