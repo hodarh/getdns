@@ -152,8 +152,10 @@
          GETDNS_RETURN_GOOD, "Return code from getdns_context_get_dns_transport()");
 	ck_assert_msg(trans == GETDNS_TRANSPORT_UDP_ONLY, "dns_transport should be GETDNS_TRANSPORT_UDP_ONLY but got %s", (char*)trans);
 
+
        ASSERT_RC(getdns_context_set_edns_maximum_udp_payload_size(context, 512),
-           GETDNS_RETURN_GOOD, "Return code from getdns_context_set_edns_maximum_udp_payload_size()"); 
+           GETDNS_RETURN_GOOD, "Return code from getdns_context_set_edns_maximum_udp_payload_size()");
+
        ASSERT_RC(getdns_context_set_edns_do_bit(context, 1),
            GETDNS_RETURN_GOOD, "Return code from getdns_context_set_edns_do_bit()");
 
@@ -213,6 +215,9 @@
        struct getdns_dict *response = NULL;
        struct getdns_dict *extensions = getdns_dict_create();
        uint32_t status;
+       uint16_t payload_size;
+       getdns_transport_t trans;
+       uint8_t do_bit;
 
        /* Recursive mode does not report the transport used and does not answer
           if the response is trucated. Also, transport can't be changed on a ub ctx.*/
@@ -227,10 +232,22 @@
            /* Request a response that should be truncated over UDP */
            ASSERT_RC(getdns_context_set_dns_transport(context, GETDNS_TRANSPORT_UDP_ONLY),
              GETDNS_RETURN_GOOD, "Return code from getdns_context_set_dns_transport()");
+           ASSERT_RC(getdns_context_get_dns_transport(context, &trans),
+             GETDNS_RETURN_GOOD, "Return code from getdns_context_get_dns_transport()");
+           ck_assert_msg(trans == GETDNS_TRANSPORT_UDP_ONLY, "dns_transport should be 541(GETDNS_TRANSPORT_UDP_ONLY) but got %d", (int)trans);
+
            ASSERT_RC(getdns_context_set_edns_maximum_udp_payload_size(context, 512),
                GETDNS_RETURN_GOOD, "Return code from getdns_context_set_edns_maximum_udp_payload_size()");
+           ASSERT_RC(getdns_context_get_edns_maximum_udp_payload_size(context, &payload_size),
+               GETDNS_RETURN_GOOD, "Return code from getdns_context_get_edns_maximum_udp_payload_size()");
+           ck_assert_msg(payload_size == 512, "payload_size should be 512, got %d", (int)payload_size);
+
+           ASSERT_RC(getdns_context_get_edns_do_bit(context, &do_bit),
+               GETDNS_RETURN_GOOD, "Return code from getdns_context_get_edns_do_bit()");
+           ck_assert_msg(do_bit == 0, "do_bit should be 0, got %d", (int)do_bit);
+
            ASSERT_RC(getdns_context_set_timeout(context, 2000),
-               GETDNS_RETURN_GOOD, "Return code from getdns_context_set_edns_maximum_udp_payload_size()");
+               GETDNS_RETURN_GOOD, "Return code from getdns_context_set_timeout()");
            ASSERT_RC(getdns_general_sync(context, "large.getdnsapi.net", GETDNS_RRTYPE_TXT, extensions, &response), 
              GETDNS_RETURN_GOOD, "Return code from getdns_general_sync()");
 
@@ -323,6 +340,7 @@
        struct getdns_dict *extensions = getdns_dict_create();
        uint32_t status;
        uint32_t tc;
+       getdns_transport_t trans;
 
        CONTEXT_CREATE(TRUE);
        /* Need to explicit check as we may be compiled stub-only*/
@@ -334,6 +352,10 @@
            /* Now let it fall back to TCP */
            ASSERT_RC(getdns_context_set_dns_transport(context, GETDNS_TRANSPORT_UDP_FIRST_AND_FALL_BACK_TO_TCP),
              GETDNS_RETURN_GOOD, "Return code from getdns_context_set_dns_transport()");
+           ASSERT_RC(getdns_context_get_dns_transport(context, &trans),
+             GETDNS_RETURN_GOOD, "Return code from getdns_context_get_dns_transport()");
+           ck_assert_msg(trans == GETDNS_TRANSPORT_UDP_FIRST_AND_FALL_BACK_TO_TCP, "dns_transport should be 540 but got %d", (int)trans);
+
            ASSERT_RC(getdns_context_set_edns_maximum_udp_payload_size(context, 512),
              GETDNS_RETURN_GOOD, "Return code from getdns_context_set_edns_maximum_udp_payload_size()");
            ASSERT_RC(getdns_general_sync(context, "large.getdnsapi.net", GETDNS_RRTYPE_TXT, extensions, &response), 
